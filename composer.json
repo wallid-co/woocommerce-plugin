@@ -1,0 +1,21 @@
+{
+  "name": "wallid/wallid-payment-gateway",
+  "description": "Wallid Payment Gateway",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Wallid",
+      "email": "support@wallid.co"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "WallidCommerceGateway\\": "src"
+    }
+  }
+}
