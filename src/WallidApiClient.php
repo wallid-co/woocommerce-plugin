@@ -8,7 +8,7 @@ class WallidApiClient
     private $terminal_secret;
     private $api_base_url;
 
-    public function __construct($terminal_id, $terminal_secret, $api_base_url = 'https://pay.stg.wlld.dev')
+    public function __construct($terminal_id, $terminal_secret, $api_base_url = 'https://pay.wallid.co')
     {
         $this->terminal_id = $terminal_id;
         $this->terminal_secret = $terminal_secret;
@@ -23,7 +23,7 @@ class WallidApiClient
      * @param string $currency Currency code (e.g., 'GBP', 'USD')
      * @param string $checkoutUrl Checkout URL
      * @param string $successUrl Success redirect URL
-     * @param string $payRedirectUrl Base URL for payment redirect (e.g., 'https://pay.stg.wlld.dev')
+     * @param string $payRedirectUrl Base URL for payment redirect (e.g., 'https://pay.wallid.co')
      * @return array|false Returns array with 'url' and 'paymentId' on success, false on failure
      */
     public function createPayment($total, $orderId, $currency, $checkoutUrl, $successUrl = null, $payRedirectUrl = null)
