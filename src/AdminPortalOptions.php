@@ -16,34 +16,33 @@ class AdminPortalOptions
                 'label' => 'Enable Wallid Gateway',
                 'default' => 'yes'
             ),
-            'terminal_id' => array(
-                'title' => 'Integration ID',
-                'type' => 'text',
-                'description' => 'Enter the terminal ID Here.',
-                'default' => '',
-                'desc_tip' => true,
-            ),
-
-            'terminal_secret' => array(
-                'title' => 'Integration Secret',
-                'type' => 'text',
-                'description' => 'Enter the terminal Secret Here',
-                'default' => '',
-                'desc_tip' => true,
-            ),
             'title' => array(
                 'title' => 'Title',
                 'type' => 'text',
-                'description' => 'This controls the title which the user sees during checkout.',
-                'default' => 'Pay by bank',
+                'description' => 'This what title user sees during checkout.',
+                'default' => 'Wallid: Pay by Bank',
                 'desc_tip' => true,
             ),
             'description' => array(
                 'title' => 'Description',
                 'type' => 'text',
                 'desc_tip' => true,
-                'description' => 'This controls the description which the user sees during checkout.',
-                'default' => 'Pay instantly via online bank transfer - Supports most of the U.K banks',
+                'description' => 'This what description user sees during checkout.',
+                'default' => 'Pay securely with your bank app — no card needed',
+            ),
+            'terminal_id' => array(
+                'title' => 'ID',
+                'type' => 'text',
+                'description' => 'Enter the ID here.',
+                'default' => '',
+                'desc_tip' => true,
+            ),
+            'terminal_secret' => array(
+                'title' => 'Secret',
+                'type' => 'text',
+                'description' => 'Enter the Secret here.',
+                'default' => '',
+                'desc_tip' => true,
             ),
         );
     }

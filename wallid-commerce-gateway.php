@@ -3,7 +3,7 @@
  * Plugin Name:       Wallid ECommerce
  * Plugin URI:        https://www.wallid.co
  * Description:       Enables the wallid payment option on woocommerce.
- * Version:           1.1.1
+ * Version:           1.1.4
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Wallid

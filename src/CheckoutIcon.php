@@ -9,7 +9,7 @@ class CheckoutIcon
     public static function get($id)
     {
         $icon_html = '';
-        $providers = array('bank-payment');
+        $providers = array('wallid-payment-logo');
         foreach ($providers as $provider) {
             $url = \WC_HTTPS::force_https_url(plugin_dir_url(dirname(__FILE__, 1)) . 'assets/' . $provider . '.svg');
             $icon_html .= '<img style="vertical-align: bottom;" width="26" src="' . esc_attr($url) . '" alt="' . esc_attr($provider) . '" />';
