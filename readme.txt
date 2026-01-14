@@ -1,4 +1,4 @@
-=== Wallid Payment Gateway for WooCommerce ===
+=== Wallid Pay By Bank for WooCommerce ===
 Contributors: Wallid
 Requires at least: 5.0
 Requires PHP: 7.4
@@ -8,37 +8,44 @@ License: GPLv2 or later
 
 == Description ==
 
-**Payments made simple**
+Accept Open Banking payments in WooCommerce
 
-Securely accept account-to-account payments and allow customers to pay you directly from their bank account to yours. Plus, save money on payment processing fees.
+Wallid enables merchants to accept account-to-account payments in WooCommerce using Open Banking. Customers pay directly from their bank account to the merchant’s bank account, without using debit or credit cards.
 
-Once you've enabled wallid powered Open Banking payments in your WooCommerce checkout, you can take advantage of the following features:
+Once the Wallid payment method is enabled at checkout, payments are authorised within the customer’s own banking app and completed via the Faster Payments network.
 
-* Instant settlement - receive funds from transactions deposited directly to your account
-* Save on fees – process up to £10,000 for only £24.99 per month
-* Bank-level security - all payments are processed via banks on the faster payments network
-
-**Manage transactions comfortably from the Wallid Business Portal**
-
-Use our business portal to easily manage all your transactions, WooCommerce or otherwise.
-
-From our *Business Portal,* you can:
-* View the details of both ecommerce payments and other transactions.
-* Manage bank details for direct transfers for all your orders
-* Add new integrations and activate your plug-in and integrations
+Key features:
+ * Instant settlement
+Payments are transferred directly to the merchant’s bank account, typically in real time, without payout delays.
+ * Transparent pricing
+1% + 25p payment fees with discounts for high volume.
+ * Secure bank authorisation
+Customers authenticate payments using their bank’s existing security mechanisms. No card details are collected or stored.
+ * WooCommerce-native integration
+The plugin integrates directly with WooCommerce checkout and order management, requiring no custom development.
 
 
+Wallid Merchant Portal
 
-**About Wallid**
+Merchants can manage and monitor their payments through the Wallid Merchant Portal.
 
-Wallid is an alternative payment method to debit and credit cards. It allows businesses to get paid directly and instantly into their bank account from websites, via payment links, invoice payments and QR codes.
+Key features::
+ * View detailed information for WooCommerce payments
+ * Manage bank account details used for settlement
+ * Initiate Instant Refunds
+ * Get reconciliation reports 
 
-**GETTING STARTED**
+
+About Wallid
+
+Wallid is an Open Banking–based payment platform that provides an alternative to card payments. It allows businesses to receive payments directly into their bank account via online checkouts.
+Wallid operates using regulated Open Banking infrastructure and is designed to support secure, direct bank-to-bank payments for UK & EU merchants.
+
+
+GETTING STARTED
 
 *REQUIREMENTS*
 
 * WordPress 5.8 or newer.
 * WooCommerce 6.6 or newer.
 * PHP version 7.0 or newer. PHP 7.2 or newer is recommended.
-
-

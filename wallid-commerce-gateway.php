@@ -1,42 +1,31 @@
 <?php
 /**
- * Plugin Name:       Wallid ECommerce
- * Plugin URI:        https://www.wallid.co
- * Description:       Enables the wallid payment option on woocommerce.
+ * Plugin Name:       Wallid Pay By Bank 
+ * Plugin URI:        https://wallid.co
+ * Description:       Wallid enables merchants to accept account-to-account payments in WooCommerce using Open Banking.
  * Version:           1.1.4
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Wallid
- * Author URI:        https://www.wallid.co
+ * Author URI:        https://wallid.co
  * Text Domain:       wallid
  * Domain Path:       /languages
  * License:           GPL v3 or later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  * 
- * NOTE: To install multiple versions (staging/production) on the same WordPress site,
- * you need to change BOTH:
- * 1. The "Plugin Name" above (already set to "Wallid ECommerce Staging")
- * 2. The plugin FOLDER NAME when uploading/installing
  * 
- * For example:
- * - Production: Plugin Name = "Wallid ECommerce", Folder = "wallid-woocommerce-gateway"
- * - Staging: Plugin Name = "Wallid ECommerce Staging", Folder = "wallid-woocommerce-gateway-staging"
- * - Development: Plugin Name = "Wallid ECommerce Dev", Folder = "wallid-woocommerce-gateway-dev"
- * 
- * IMPORTANT: Before uploading, rename the plugin folder to match your environment!
- * 
- * Wallid ECommerce Plugin is free software: you can redistribute it and/or modify
+ * Wallid Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  * 
- * Wallid ECommerce Plugin is distributed in the hope that it will be useful,
+ * Wallid Plugin is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Wallid ECommerce Plugin. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
+ * along with Wallid Plugin. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  */
 function wallid_woocommerce_stripe_missing_wc_notice()
 {
