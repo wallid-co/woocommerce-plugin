@@ -41,7 +41,7 @@ class WallidApiClient
             'shopId' => $this->terminal_id, // Using terminal_id as shopId
             'checkoutUrl' => $checkoutUrl,
             'successUrl' => $successUrl ? $successUrl : $checkoutUrl,
-            'isWoocommerce' => true,
+            'paymentType' => 'WOOCOMMERCE',
         ];
 
         // Public endpoint - authentication via shopId in payload

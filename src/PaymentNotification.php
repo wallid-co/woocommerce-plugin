@@ -19,7 +19,12 @@ class PaymentNotification
         if (!self::validateWebhookSignature($raw_body, $terminal_secret)) {
             error_log("Wallid webhook: Invalid signature");
             http_response_code(401);
-            die('Invalid signature');
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error'   => 'Webhook validation failed',
+                'message' => 'Invalid signature',
+            ]);
+            exit;
         }
 
         $data = json_decode($raw_body, true);
