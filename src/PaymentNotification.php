@@ -5,110 +5,133 @@ namespace WallidCommerceGateway;
 
 class PaymentNotification
 {
+    /**
+     * Send a JSON response and exit.
+     *
+     * @param int   $http_code HTTP status code
+     * @param array $payload   Response payload
+     */
+    private static function sendJsonResponse($http_code, array $payload)
+    {
+        http_response_code($http_code);
+        header('Content-Type: application/json');
+        echo json_encode($payload);
+        exit;
+    }
+
+    /**
+     * Send JSON error response and exit.
+     *
+     * @param int    $http_code HTTP status code
+     * @param string $error     Error type/code
+     * @param string $message   Human-readable message
+     */
+    private static function sendJsonError($http_code, $error, $message)
+    {
+        self::sendJsonResponse($http_code, [
+            'error'   => $error,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * Resolve a webhook order reference to a WooCommerce order.
+     *
+     * Supports normal numeric WooCommerce order IDs and common custom
+     * order number meta keys used by order-number plugins.
+     *
+     * @param mixed $order_reference Order ID or custom order number
+     * @return \WC_Order|false
+     */
+    private static function resolveOrder($order_reference)
+    {
+        if (!is_scalar($order_reference)) {
+            return false;
+        }
+
+        $order_reference = trim((string) $order_reference);
+
+        if ($order_reference === '') {
+            return false;
+        }
+
+        // Keep the normal WooCommerce numeric-ID path intact.
+        if (ctype_digit($order_reference)) {
+            $order = wc_get_order((int) $order_reference);
+            if ($order instanceof \WC_Order) {
+                return $order;
+            }
+        }
+
+        $meta_keys = [
+            '_alg_wc_full_custom_order_number',
+            '_order_number_formatted',
+            '_order_number',
+            '_wcj_order_number',
+        ];
+
+        foreach ($meta_keys as $meta_key) {
+            $orders = wc_get_orders([
+                'limit'      => 1,
+                'return'     => 'objects',
+                'type'       => 'shop_order',
+                'status'     => array_keys(wc_get_order_statuses()),
+                'meta_key'   => $meta_key,
+                'meta_value' => $order_reference,
+            ]);
+
+            if (!empty($orders) && $orders[0] instanceof \WC_Order) {
+                return $orders[0];
+            }
+        }
+
+        return false;
+    }
 
     public static function process($terminal_id, $terminal_secret)
     {
         global $woocommerce;
 
-        error_log("Wallid webhook processing started");
-
         // Get raw request body for signature verification
         $raw_body = file_get_contents('php://input');
-        
+
         // Validate webhook signature
         if (!self::validateWebhookSignature($raw_body, $terminal_secret)) {
             error_log("Wallid webhook: Invalid signature");
-            http_response_code(401);
-            header('Content-Type: application/json');
-            echo json_encode([
-                'error'   => 'Webhook validation failed',
-                'message' => 'Invalid signature',
-            ]);
-            exit;
+            self::sendJsonError(401, 'Webhook validation failed', 'Invalid signature');
         }
 
         $data = json_decode($raw_body, true);
 
         if (!isset($data['status'])) {
-            error_log("Status not in data");
-            die();
+            error_log("Wallid webhook: Status not in data");
+            self::sendJsonError(400, 'Bad request', 'Missing required field: status');
         }
         if (!isset($data['order_id'])) {
-            error_log("Order ID not in data");
-            die();
+            error_log("Wallid webhook: Order ID not in data");
+            self::sendJsonError(400, 'Bad request', 'Missing required field: order_id');
         }
 
         $order_number = $data['order_id'];
         $status = $data['status'];
         $amount = $data['amount'];
+        $order = self::resolveOrder($order_number);
 
-        $args    = array(
-            'post_type'      => 'shop_order',
-            'post_status'    => 'any',
-            'meta_query'     => array(
-                array(
-                    'key'        => '_alg_wc_full_custom_order_number',
-                    'value'      => $order_number,  //here you pass the Order Number
-                    'compare'    => '=',
-                )
-            )
-        );
-        $query   = new \WP_Query( $args );
-        if ( !empty( $query->posts ) ) {
-            $orderId = $query->posts[ 0 ]->ID;
-        } else {
-            $args    = array(
-                'post_type'      => 'shop_order',
-                'post_status'    => 'any',
-                'meta_query'     => array(
-                    array(
-                        'key'        => '_order_number',
-                        'value'      => $order_number,  //here you pass the Order Number
-                        'compare'    => '=',
-                    )
-                )
-            );
-            $query   = new \WP_Query( $args );
-            if ( !empty( $query->posts ) ) {
-                $orderId = $query->posts[ 0 ]->ID;
-            } else {
-                $args    = array(
-                    'post_type'      => 'shop_order',
-                    'post_status'    => 'any',
-                    'meta_query'     => array(
-                        array(
-                            'key'        => '_wcj_order_number',
-                            'value'      => $order_number,  //here you pass the Order Number
-                            'compare'    => '=',
-                        )
-                    )
-                );
-                $query   = new \WP_Query( $args );
-                if ( !empty( $query->posts ) ) {
-                    $orderId = $query->posts[ 0 ]->ID;
-                } else {
-                    $orderId = $order_number;
-                }
-            }
+        if (!$order || !($order instanceof \WC_Order)) {
+            error_log("Wallid webhook: Order not found for order reference " . $order_number);
+            self::sendJsonError(404, 'Order not found', 'No WooCommerce order found for the given order_id');
         }
 
-        if (!isset($orderId)) {
-            error_log( "Order ID not found" );
-            die();
-        }
-
-        $order = wc_get_order($orderId);
-
-        if (!isset($order)) {
-            error_log( "Order not found" );
-            die();
-        }
+        $orderId = $order->get_id();
 
         $order->add_order_note("WALLID: Order found, processing the webhook with status " . $status, 0);
 
         if ($status == 'sent') {
-            error_log("Status is still sent");
-            die();
+            error_log("Wallid webhook: Status is still sent, no action taken");
+            self::sendJsonResponse(200, [
+                'message' => 'Status unchanged',
+                'status'  => 'sent',
+            ]);
         }
 
         if ($status == 'paid') {
@@ -136,7 +159,12 @@ class PaymentNotification
 
             $order->cancel_order();
         }
-        exit();
+
+        self::sendJsonResponse(200, [
+            'message' => 'Webhook processed',
+            'status' => $status,
+            'order_id' => $order_number,
+        ]);
     }
 
     /**
