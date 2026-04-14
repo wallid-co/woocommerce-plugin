@@ -11,8 +11,6 @@ final class WallidPaymentGateway extends WC_Payment_Gateway
 
     public function __construct()
     {
-        error_log('Wallid Payment Gateway: Constructor called');
-        
         $this->id = 'wallid_payment';
         $this->method_title = 'Wallid';
 
@@ -49,8 +47,6 @@ final class WallidPaymentGateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
         add_action('woocommerce_api_wallid', array($this, 'webhook'));
-        
-        error_log('Wallid Payment Gateway: Constructor completed. ID: ' . $this->id . ', Enabled: ' . $this->enabled);
     }
 
     public function init_form_fields()

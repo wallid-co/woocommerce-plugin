@@ -3,7 +3,7 @@
  * Plugin Name:       Wallid Pay By Bank 
  * Plugin URI:        https://wallid.co
  * Description:       Wallid enables merchants to accept account-to-account payments in WooCommerce using Open Banking.
- * Version:           1.1.7
+ * Version:           1.1.8
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Wallid
@@ -61,9 +61,6 @@ function woocommerce_gateway_wallid_init()
         // Check if class exists before adding
         if (class_exists('WallidCommerceGateway\\WallidPaymentGateway')) {
             $gateways[] = 'WallidCommerceGateway\\WallidPaymentGateway';
-            error_log('Wallid Payment Gateway: Successfully registered. Total gateways: ' . count($gateways));
-        } else {
-            error_log('Wallid Payment Gateway: ERROR - Class not found!');
         }
         return $gateways;
     }
@@ -75,46 +72,9 @@ function woocommerce_gateway_wallid_init()
         {
             if (class_exists('WallidCommerceGateway\\WallidBlocksIntegration')) {
                 $payment_method_registry->register(new \WallidCommerceGateway\WallidBlocksIntegration());
-                error_log('Wallid Payment Gateway: Blocks integration registered');
             }
         }
     }
-    
-    // Ensure gateway is available in checkout
-    add_filter('woocommerce_available_payment_gateways', 'ensureWallidGatewayAvailable', 10, 1);
-    function ensureWallidGatewayAvailable($available_gateways)
-    {
-        // Force add the gateway if it's not there but should be
-        if (!isset($available_gateways['wallid_payment'])) {
-            $gateway = new \WallidCommerceGateway\WallidPaymentGateway();
-            if ($gateway->is_available()) {
-                $available_gateways['wallid_payment'] = $gateway;
-                error_log('Wallid Payment Gateway: Force added to available gateways');
-            } else {
-                error_log('Wallid Payment Gateway: NOT available, not adding');
-            }
-        } else {
-            error_log('Wallid Payment Gateway: Already in available gateways');
-        }
-        
-        // Debug: Log all available gateways
-        error_log('Wallid Payment Gateway: Available gateways on checkout: ' . implode(', ', array_keys($available_gateways)));
-        
-        return $available_gateways;
-    }
-    
-    // Add debug info to checkout page (temporary)
-    add_action('wp_footer', function() {
-        if (is_checkout()) {
-            $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-            echo '<!-- Wallid Debug: Available gateways: ' . implode(', ', array_keys($available_gateways)) . ' -->';
-            if (isset($available_gateways['wallid_payment'])) {
-                echo '<!-- Wallid Debug: wallid_payment IS available -->';
-            } else {
-                echo '<!-- Wallid Debug: wallid_payment NOT in available gateways -->';
-            }
-        }
-    });
 }
 
 
