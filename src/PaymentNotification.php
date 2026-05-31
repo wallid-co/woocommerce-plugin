@@ -97,18 +97,18 @@ class PaymentNotification
 
         // Validate webhook signature
         if (!self::validateWebhookSignature($raw_body, $terminal_secret)) {
-            error_log("Wallid webhook: Invalid signature");
+            wallid_log('Wallid webhook: Invalid signature', 'error');
             self::sendJsonError(401, 'Webhook validation failed', 'Invalid signature');
         }
 
         $data = json_decode($raw_body, true);
 
         if (!isset($data['status'])) {
-            error_log("Wallid webhook: Status not in data");
+            wallid_log('Wallid webhook: Status not in data', 'warning');
             self::sendJsonError(400, 'Bad request', 'Missing required field: status');
         }
         if (!isset($data['order_id'])) {
-            error_log("Wallid webhook: Order ID not in data");
+            wallid_log('Wallid webhook: Order ID not in data', 'warning');
             self::sendJsonError(400, 'Bad request', 'Missing required field: order_id');
         }
 
@@ -118,16 +118,18 @@ class PaymentNotification
         $order = self::resolveOrder($order_number);
 
         if (!$order || !($order instanceof \WC_Order)) {
-            error_log("Wallid webhook: Order not found for order reference " . $order_number);
+            wallid_log('Wallid webhook: Order not found for order reference ' . $order_number, 'warning');
             self::sendJsonError(404, 'Order not found', 'No WooCommerce order found for the given order_id');
         }
 
         $orderId = $order->get_id();
 
+        wallid_log('Wallid webhook: Received — status=' . $status . ', order_id=' . $order_number, 'debug');
+
         $order->add_order_note("WALLID: Order found, processing the webhook with status " . $status, 0);
 
         if ($status == 'sent') {
-            error_log("Wallid webhook: Status is still sent, no action taken");
+            wallid_log('Wallid webhook: Status is still sent, no action taken', 'debug');
             self::sendJsonResponse(200, [
                 'message' => 'Status unchanged',
                 'status'  => 'sent',
@@ -145,6 +147,8 @@ class PaymentNotification
                 $order->payment_complete( $reference );
                 $order->add_order_note("Wallid Reference {$reference}", 0);
             }
+
+            wallid_log('Wallid webhook: Payment completed — order=' . $orderId . ', reference=' . ($reference ?? 'none'), 'debug');
         }
         if ($status == 'failed') {
             $order->add_order_note("WooCommerce Default Order ID {$orderId}", 0);
@@ -158,6 +162,8 @@ class PaymentNotification
             }
 
             $order->cancel_order();
+
+            wallid_log('Wallid webhook: Payment failed — order=' . $orderId, 'debug');
         }
 
         self::sendJsonResponse(200, [
@@ -176,27 +182,24 @@ class PaymentNotification
      */
     private static function validateWebhookSignature($raw_body, $terminal_secret)
     {
-        // Get signature from header
-        $signature_header = isset($_SERVER['HTTP_X_WALLID_SIGNATURE']) 
-            ? $_SERVER['HTTP_X_WALLID_SIGNATURE'] 
+        $signature_header = isset($_SERVER['HTTP_X_WALLID_SIGNATURE'])
+            ? $_SERVER['HTTP_X_WALLID_SIGNATURE']
             : (isset($_SERVER['HTTP_X_WEBHOOK_SIGNATURE']) ? $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] : '');
-        
+
         if (empty($signature_header)) {
-            error_log("Wallid webhook: Signature header missing");
+            wallid_log('Wallid webhook: Signature header missing', 'warning');
             return false;
         }
 
         if (empty($terminal_secret)) {
-            error_log("Wallid webhook: Terminal secret not configured");
+            wallid_log('Wallid webhook: Terminal secret not configured', 'error');
             return false;
         }
 
-        // Calculate expected signature using HMAC SHA256
         $expected_signature = hash_hmac('sha256', $raw_body, $terminal_secret);
-        
-        // Use constant-time comparison to prevent timing attacks
+
         if (!hash_equals($expected_signature, $signature_header)) {
-            error_log("Wallid webhook: Signature mismatch");
+            wallid_log('Wallid webhook: Signature mismatch', 'warning');
             return false;
         }
 

@@ -44,9 +44,7 @@ final class WallidBlocksIntegration extends AbstractPaymentMethodType
      */
     public function is_active()
     {
-        $is_active = $this->gateway && $this->gateway->is_available();
-        error_log('Wallid Payment Gateway: is_active() = ' . ($is_active ? 'true' : 'false'));
-        return $is_active;
+        return $this->gateway && $this->gateway->is_available();
     }
 
     /**
@@ -80,7 +78,7 @@ final class WallidBlocksIntegration extends AbstractPaymentMethodType
                 true // Keep in footer where WooCommerce Blocks expects it
             );
             
-            error_log('Wallid Payment Gateway: Script registered at ' . $script_url);
+            wallid_log('Wallid Payment Gateway: Script registered at ' . $script_url, 'debug');
             
             // Note: Payment method data is automatically made available via getSetting('wallid_payment_data')
             // WooCommerce Blocks automatically appends '_data' to the payment method name
