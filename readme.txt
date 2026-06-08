@@ -3,7 +3,7 @@ Contributors: Wallid
 Requires at least: 5.0
 Requires PHP: 7.4
 Tested up to: 6.0
-Stable tag: 1.1.6
+Stable tag: 1.1.8
 License: GPLv2 or later
 
 == Description ==

@@ -3,7 +3,7 @@
  * Plugin Name:       Wallid Pay By Bank 
  * Plugin URI:        https://wallid.co
  * Description:       Wallid enables merchants to accept account-to-account payments in WooCommerce using Open Banking.
- * Version:           1.1.8
+ * Version:           1.1.9
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Wallid
@@ -42,6 +42,7 @@ function woocommerce_gateway_wallid_init()
 
     // Load required classes only after WooCommerce is available
     $plugin_path = plugin_dir_path(__FILE__);
+    require_once $plugin_path . 'src/WallidLogger.php';
     require_once $plugin_path . 'src/WallidApiClient.php';
     require_once $plugin_path . 'src/AdminPortalOptions.php';
     require_once $plugin_path . 'src/AdminPortalUI.php';

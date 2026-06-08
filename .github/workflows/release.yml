@@ -1,0 +1,42 @@
+name: Package and release WalliD WooCommerce plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: wallid-commerce-gateway
+
+      - name: Create ZIP Bundle
+        run: |
+          zip -r "wallid-commerce-gateway-${{ github.ref_name }}.zip" wallid-commerce-gateway \
+            -x "*/.git/*" \
+            -x "*/.idea/*" \
+            -x "*/.github/*" \
+            -x "*/.gitignore" \
+            -x "*/README.md" \
+            -x "*/composer.json"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wallid-commerce-gateway-${{ github.ref_name }}-zip"
+          path: "wallid-commerce-gateway-${{ github.ref_name }}.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "wallid-commerce-gateway-${{ github.ref_name }}.zip"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

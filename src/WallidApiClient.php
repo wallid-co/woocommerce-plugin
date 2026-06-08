@@ -10,9 +10,9 @@ class WallidApiClient
 
     public function __construct($terminal_id, $terminal_secret, $api_base_url = 'https://pay.wallid.co')
     {
-        $this->terminal_id = $terminal_id;
+        $this->terminal_id     = $terminal_id;
         $this->terminal_secret = $terminal_secret;
-        $this->api_base_url = rtrim($api_base_url, '/');
+        $this->api_base_url    = rtrim($api_base_url, '/');
     }
 
     /**
@@ -30,7 +30,7 @@ class WallidApiClient
     {
         // Validate shopId/terminal_id is set
         if (empty($this->terminal_id)) {
-            error_log('Wallid API Error: shopId (terminal_id) is empty');
+            wallid_log('Wallid API Error: shopId (terminal_id) is empty', 'error');
             return false;
         }
         
@@ -43,6 +43,8 @@ class WallidApiClient
             'successUrl' => $successUrl ? $successUrl : $checkoutUrl,
             'paymentType' => 'WOOCOMMERCE',
         ];
+
+        wallid_log('Wallid API: Creating payment — order=' . $orderId . ', total=' . $total . ' ' . $currency, 'debug');
 
         // Public endpoint - authentication via shopId in payload
         $response = $this->makeRequest('POST', '/api/payment/public/v1/pay/create', $payload, true);
@@ -61,7 +63,7 @@ class WallidApiClient
                 $errorDetails[] = isset($error['detail']) ? $error['detail'] : (isset($error['title']) ? $error['title'] : 'Unknown error');
             }
             $errorMsg = implode(', ', $errorDetails);
-            error_log('Wallid API Error: ' . $errorMsg);
+            wallid_log('Wallid API Error: ' . $errorMsg, 'error');
             return false;
         }
         
@@ -76,14 +78,16 @@ class WallidApiClient
         // If response has error fields, it's a failure
         elseif (is_array($response) && (isset($response['error']) || isset($response['message']) || isset($response['code']))) {
             $errorMsg = isset($response['error']) ? $response['error'] : (isset($response['message']) ? $response['message'] : 'Unknown error');
-            error_log('Wallid API Error: ' . $errorMsg);
+            wallid_log('Wallid API Error: ' . $errorMsg, 'error');
             return false;
         }
         
         if (!$paymentId || !is_string($paymentId)) {
-            error_log('Wallid API Error: paymentId not found or invalid in response');
+            wallid_log('Wallid API Error: paymentId not found or invalid in response', 'error');
             return false;
         }
+
+        wallid_log('Wallid API: Payment created — order=' . $orderId . ', paymentId=' . $paymentId, 'debug');
 
         // Build redirect URL with base64 encoded payment data
         $finalUrl = $this->buildPaymentRedirectUrl($payRedirectUrl ?: $this->api_base_url, $paymentId);
@@ -107,8 +111,8 @@ class WallidApiClient
         $parsedUrl = parse_url($baseUrl);
         
         if ($parsedUrl === false) {
-            error_log('Wallid API Error: Invalid base URL for payment redirect');
-            return $baseUrl; // Return base URL as fallback
+            wallid_log('Wallid API Error: Invalid base URL for payment redirect', 'warning');
+            return $baseUrl;
         }
 
         // Create base64 encoded JSON with paymentId
@@ -161,6 +165,8 @@ class WallidApiClient
     {
         $url = $this->api_base_url . $endpoint;
 
+        wallid_log('Wallid API: ' . $method . ' ' . $endpoint, 'debug');
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -195,7 +201,7 @@ class WallidApiClient
         curl_close($ch);
 
         if ($response === false || !empty($curlError)) {
-            error_log('Wallid API Error: ' . $curlError);
+            wallid_log('Wallid API Error: ' . $curlError, 'error');
             return false;
         }
 
@@ -212,13 +218,14 @@ class WallidApiClient
             } elseif (is_array($decoded_response) && (isset($decoded_response['error']) || isset($decoded_response['message']))) {
                 $errorMessage .= ' - ' . (isset($decoded_response['error']) ? $decoded_response['error'] : $decoded_response['message']);
             }
-            error_log('Wallid API HTTP Error: ' . $errorMessage);
+            wallid_log('Wallid API HTTP Error: ' . $errorMessage, 'error');
+            wallid_log('Wallid API HTTP Error response body: ' . $response, 'debug');
             return false;
         }
 
         $decoded = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log('Wallid API JSON Error: ' . json_last_error_msg());
+            wallid_log('Wallid API JSON Error: ' . json_last_error_msg(), 'error');
             return false;
         }
 
