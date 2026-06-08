@@ -46,7 +46,6 @@ final class WallidPaymentGateway extends WC_Payment_Gateway
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-        add_action('woocommerce_api_wallid', array($this, 'webhook'));
     }
 
     public function init_form_fields()
@@ -128,8 +127,4 @@ final class WallidPaymentGateway extends WC_Payment_Gateway
         return parent::is_available();
     }
 
-    public function webhook()
-    {
-        PaymentNotification::process($this->terminal_id, $this->terminal_secret);
-    }
 }

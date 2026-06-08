@@ -49,6 +49,17 @@ function woocommerce_gateway_wallid_init()
     require_once $plugin_path . 'src/PaymentProcess.php';
     require_once $plugin_path . 'src/PaymentNotification.php';
     require_once $plugin_path . 'src/WallidPaymentGateway.php';
+
+    // Register webhook receiver at bootstrap level so callback handling is
+    // always available, regardless of gateway instantiation timing.
+    add_action('woocommerce_api_wallid', 'wallid_handle_wc_api_webhook');
+    function wallid_handle_wc_api_webhook()
+    {
+        $settings = get_option('woocommerce_wallid_payment_settings', []);
+        $terminal_id = isset($settings['terminal_id']) ? $settings['terminal_id'] : '';
+        $terminal_secret = isset($settings['terminal_secret']) ? $settings['terminal_secret'] : '';
+        \WallidCommerceGateway\PaymentNotification::process($terminal_id, $terminal_secret);
+    }
     
     // Load Blocks integration if WooCommerce Blocks is active
     if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {

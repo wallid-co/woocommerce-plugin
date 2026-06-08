@@ -58,7 +58,8 @@ class PaymentProcess
         $url = $paymentResult['url'];
         $paymentId = $paymentResult['paymentId'];
 
-        $order->update_status('awaiting_payment', 'Awaiting payment');
+        // Keep order in a core unpaid status so payment_complete() can transition it.
+        $order->update_status('pending', 'Awaiting payment');
 
         $order->add_meta_data( '_wallid_payment_id', $paymentId );
         $order->add_meta_data( '_wallid_payment_url', $url );
