@@ -6,6 +6,39 @@ namespace WallidCommerceGateway;
 class PaymentNotification
 {
     /**
+     * Resolve a webhook payment ID to a WooCommerce order.
+     *
+     * @param mixed $payment_id
+     * @return \WC_Order|false
+     */
+    private static function resolveOrderByPaymentId($payment_id)
+    {
+        if (!is_scalar($payment_id)) {
+            return false;
+        }
+
+        $payment_id = trim((string) $payment_id);
+        if ($payment_id === '') {
+            return false;
+        }
+
+        $orders = wc_get_orders([
+            'limit'      => 1,
+            'return'     => 'objects',
+            'type'       => 'shop_order',
+            'status'     => array_keys(wc_get_order_statuses()),
+            'meta_key'   => '_wallid_payment_id',
+            'meta_value' => $payment_id,
+        ]);
+
+        if (!empty($orders) && $orders[0] instanceof \WC_Order) {
+            return $orders[0];
+        }
+
+        return false;
+    }
+
+    /**
      * Send a JSON response and exit.
      *
      * @param int   $http_code HTTP status code
@@ -102,6 +135,9 @@ class PaymentNotification
         }
 
         $data = json_decode($raw_body, true);
+        if (!is_array($data)) {
+            self::sendJsonError(400, 'Bad request', 'Invalid JSON payload');
+        }
 
         if (!isset($data['status'])) {
             wallid_log('Wallid webhook: Status not in data', 'warning');
@@ -114,8 +150,18 @@ class PaymentNotification
 
         $order_number = $data['order_id'];
         $status = $data['status'];
-        $amount = $data['amount'];
+        $amount = isset($data['amount']) ? $data['amount'] : '';
+        $webhook_payment_id = '';
+        if (isset($data['paymentId'])) {
+            $webhook_payment_id = trim((string) $data['paymentId']);
+        } elseif (isset($data['payment_id'])) {
+            $webhook_payment_id = trim((string) $data['payment_id']);
+        }
+
         $order = self::resolveOrder($order_number);
+        if ((!$order || !($order instanceof \WC_Order)) && $webhook_payment_id !== '') {
+            $order = self::resolveOrderByPaymentId($webhook_payment_id);
+        }
 
         if (!$order || !($order instanceof \WC_Order)) {
             wallid_log('Wallid webhook: Order not found for order reference ' . $order_number, 'warning');
@@ -123,6 +169,11 @@ class PaymentNotification
         }
 
         $orderId = $order->get_id();
+        $stored_payment_id = (string) $order->get_meta('_wallid_payment_id');
+        if ($webhook_payment_id !== '' && $stored_payment_id !== '' && !hash_equals($stored_payment_id, $webhook_payment_id)) {
+            error_log("Wallid webhook: Payment ID mismatch for order " . $orderId);
+            self::sendJsonError(400, 'Bad request', 'Payment ID mismatch');
+        }
 
         wallid_log('Wallid webhook: Received — status=' . $status . ', order_id=' . $order_number, 'debug');
 
@@ -140,12 +191,17 @@ class PaymentNotification
             $order->add_order_note("WooCommerce Default Order ID {$orderId}", 0);
             $order->add_order_note("WooCommerce Order Number (wallid Reference): {$order_number}", 0);
             $order->add_order_note("Wallid Net Amount £{$amount}", 0);
-            $woocommerce->cart->empty_cart();
+            if ($woocommerce && isset($woocommerce->cart) && $woocommerce->cart) {
+                $woocommerce->cart->empty_cart();
+            }
 
-            if (isset($data['reference'])) {
-                $reference = $data['reference'];
-                $order->payment_complete( $reference );
+            if (isset($data['reference']) && trim((string) $data['reference']) !== '') {
+                $reference = trim((string) $data['reference']);
+                $order->payment_complete($reference);
                 $order->add_order_note("Wallid Reference {$reference}", 0);
+            } else {
+                $order->payment_complete();
+                $order->add_order_note("Wallid paid webhook received without transaction reference.", 0);
             }
 
             wallid_log('Wallid webhook: Payment completed — order=' . $orderId . ', reference=' . ($reference ?? 'none'), 'debug');
