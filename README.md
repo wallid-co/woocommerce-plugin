@@ -2,6 +2,8 @@
 
 Wallid Plugin enables merchants to accept account-to-account payments in WooCommerce using Open Banking. Customers pay directly from their bank account to the merchant’s bank account, without using debit or credit cards.
 
+License: `GPL-3.0-or-later`
+
 ## Installation
 
 1. Download the Wallid Pay by Bank plugin as a ZIP file.
