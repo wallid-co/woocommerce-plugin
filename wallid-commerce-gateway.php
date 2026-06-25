@@ -27,6 +27,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Wallid Plugin. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  */
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function wallid_woocommerce_stripe_missing_wc_notice()
 {
     echo '<div class="error"><p><strong>Wallid requires WooCommerce to be installed and active. You can download <a href="https://woocommerce.com/" target="_blank">WooCommerce</a> from here.</strong></p></div>';

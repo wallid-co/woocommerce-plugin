@@ -2,10 +2,10 @@
 Contributors: Wallid
 Requires at least: 5.0
 Requires PHP: 7.4
-Tested up to: 6.0
+Tested up to: 7.0
 Stable tag: 1.1.9
 Tags: woocommerce, open banking, pay by bank, checkout, payments
-License: GPLv2 or later
+License: GPL-3.0-or-later
 
 Accept Open Banking payments in WooCommerce with fast bank-to-bank checkout.
 
@@ -46,11 +46,6 @@ Getting started requirements:
 = Where do I get my Wallid credentials? =
 
 Create a merchant account at https://www.getwallid.co.uk, complete verification, then request activation from Wallid support. Once approved, you will receive your terminal credentials.
-
-= What webhook URL should I use? =
-
-Use your WooCommerce API endpoint:
-https://your-store-domain.com/?wc-api=wallid
 
 = Does this plugin support refunds? =
 

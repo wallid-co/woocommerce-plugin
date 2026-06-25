@@ -108,7 +108,7 @@ class WallidApiClient
     private function buildPaymentRedirectUrl($baseUrl, $paymentId)
     {
         // Parse the base URL
-        $parsedUrl = parse_url($baseUrl);
+        $parsedUrl = wp_parse_url($baseUrl);
         
         if ($parsedUrl === false) {
             wallid_log('Wallid API Error: Invalid base URL for payment redirect', 'warning');
@@ -167,43 +167,42 @@ class WallidApiClient
 
         wallid_log('Wallid API: ' . $method . ' ' . $endpoint, 'debug');
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
-        $headers = ['Content-Type: application/json'];
-        
-        // Add authentication headers only for non-public endpoints
+        $headers = [
+            'Content-Type' => 'application/json',
+        ];
+
+        // Add authentication headers only for non-public endpoints.
         if (!$isPublic) {
-            $headers[] = 'X-Terminal-ID: ' . $this->terminal_id;
-            $headers[] = 'X-Terminal-Secret: ' . $this->terminal_secret;
+            $headers['X-Terminal-ID'] = $this->terminal_id;
+            $headers['X-Terminal-Secret'] = $this->terminal_secret;
         }
-        
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        // Set HTTP method
+        $args = [
+            'headers' => $headers,
+            'timeout' => 30,
+            'sslverify' => true,
+        ];
+
+        if ($data !== null) {
+            $args['body'] = wp_json_encode($data);
+        }
+
         if ($method === 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            if ($data !== null) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            }
+            $response = wp_remote_post($url, $args);
         } elseif ($method === 'GET') {
-            curl_setopt($ch, CURLOPT_HTTPGET, true);
+            $response = wp_remote_get($url, $args);
+        } else {
+            $args['method'] = $method;
+            $response = wp_remote_request($url, $args);
         }
 
-        // SSL verification (you may want to make this configurable)
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($response === false || !empty($curlError)) {
-            wallid_log('Wallid API Error: ' . $curlError, 'error');
+        if (is_wp_error($response)) {
+            wallid_log('Wallid API Error: ' . $response->get_error_message(), 'error');
             return false;
         }
+
+        $httpCode = wp_remote_retrieve_response_code($response);
+        $response = wp_remote_retrieve_body($response);
 
         if ($httpCode < 200 || $httpCode >= 300) {
             // Log only HTTP code and sanitized error message, not full response

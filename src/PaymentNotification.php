@@ -171,7 +171,7 @@ class PaymentNotification
         $orderId = $order->get_id();
         $stored_payment_id = (string) $order->get_meta('_wallid_payment_id');
         if ($webhook_payment_id !== '' && $stored_payment_id !== '' && !hash_equals($stored_payment_id, $webhook_payment_id)) {
-            error_log("Wallid webhook: Payment ID mismatch for order " . $orderId);
+            wallid_log('Wallid webhook: Payment ID mismatch for order ' . $orderId, 'warning');
             self::sendJsonError(400, 'Bad request', 'Payment ID mismatch');
         }
 
@@ -238,9 +238,13 @@ class PaymentNotification
      */
     private static function validateWebhookSignature($raw_body, $terminal_secret)
     {
-        $signature_header = isset($_SERVER['HTTP_X_WALLID_SIGNATURE'])
-            ? $_SERVER['HTTP_X_WALLID_SIGNATURE']
-            : (isset($_SERVER['HTTP_X_WEBHOOK_SIGNATURE']) ? $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] : '');
+        $signature_header = '';
+
+        if (isset($_SERVER['HTTP_X_WALLID_SIGNATURE'])) {
+            $signature_header = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WALLID_SIGNATURE']));
+        } elseif (isset($_SERVER['HTTP_X_WEBHOOK_SIGNATURE'])) {
+            $signature_header = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WEBHOOK_SIGNATURE']));
+        }
 
         if (empty($signature_header)) {
             wallid_log('Wallid webhook: Signature header missing', 'warning');
