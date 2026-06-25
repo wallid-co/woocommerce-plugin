@@ -2,10 +2,10 @@
 Contributors: Wallid
 Requires at least: 5.0
 Requires PHP: 7.4
-Tested up to: 1.1.9
+Tested up to: 7.0
 Stable tag: 1.1.9
 Tags: woocommerce, open banking, pay by bank, checkout, payments
-License: GPLv2 or later
+License: GPL-3.0-or-later
 
 Accept Open Banking payments in WooCommerce with fast bank-to-bank checkout.
 
