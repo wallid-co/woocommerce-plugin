@@ -7,7 +7,6 @@
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Wallid
- * Author URI:        https://wallid.co
  * Text Domain:       wallid
  * Domain Path:       /languages
  * License:           GPL v3 or later
