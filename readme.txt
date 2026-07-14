@@ -3,7 +3,7 @@ Contributors: dianne@corp.wallid.co
 Requires at least: 5.0
 Requires PHP: 7.4
 Tested up to: 7.0
-Stable tag: 1.1.12
+Stable tag: 1.1.13
 Tags: woocommerce, open banking, pay by bank, checkout, payments
 License: GPL-3.0-or-later
 
