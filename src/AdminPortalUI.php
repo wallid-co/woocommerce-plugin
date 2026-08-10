@@ -100,7 +100,7 @@ class AdminPortalUI
     public static function get($settings)
     {
         ?>
-        <h2><?php echo esc_html__('Wallid Payment Gateway', 'wallid'); ?></h2>
+        <h2><?php echo esc_html__('Wallid Payment Gateway', 'wall-id-pay-by-bank'); ?></h2>
         <table class="form-table">
             <?php echo wp_kses($settings, self::getAllowedSettingsHtml()); ?>
         </table>

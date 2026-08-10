@@ -1,9 +1,9 @@
-=== Wallid Pay By Bank for WooCommerce ===
-Contributors: Wallid
+=== WALL ID Pay By Bank ===
+Contributors: dianne@corp.wallid.co
 Requires at least: 5.0
 Requires PHP: 7.4
 Tested up to: 7.0
-Stable tag: 1.1.9
+Stable tag: 1.1.13
 Tags: woocommerce, open banking, pay by bank, checkout, payments
 License: GPL-3.0-or-later
 
@@ -54,6 +54,27 @@ Instant refunds are managed through the Wallid Merchant Portal.
 = Which countries are supported? =
 
 Wallid supports UK and EU merchants. Availability depends on your account setup and verification status.
+
+== External services ==
+
+This plugin connects to the Wallid Pay-by-Bank service at https://pay.wallid.co to create payments and redirect customers to complete Open Banking checkout.
+
+When a customer chooses Wallid at checkout, the plugin sends the following order data to https://pay.wallid.co:
+
+* currency
+* order total
+* order ID / reference
+* shop / terminal ID
+* checkout URL
+* success (order received) URL
+* payment type (WOOCOMMERCE)
+
+Customers are then redirected to https://pay.wallid.co to select their bank and authorise the payment. Wallid sends payment status updates back to the store via webhook so WooCommerce order status can be updated.
+
+This service is provided by Wallid:
+
+* Terms of service: https://wallid.co/terms-conditions
+* Privacy policy: https://wallid.co/privacy-policy
 
 == Screenshots ==
 

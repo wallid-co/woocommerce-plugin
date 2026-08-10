@@ -1,0 +1,9 @@
+.payment_method_wallid_payment label img {
+	vertical-align: bottom;
+}
+
+@media only screen and (max-width: 1000px) {
+	.payment_method_wallid_payment label img {
+		vertical-align: bottom;
+	}
+}
