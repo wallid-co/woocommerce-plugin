@@ -94,4 +94,41 @@ function woocommerce_gateway_wallid_init()
 }
 
 
+// Register custom order status 'payment-sent'
+function wallid_register_payment_sent_order_status() {
+    register_post_status('wc-payment-sent', array(
+        'label'                     => _x('Payment Sent', 'Order status', 'wall-id-pay-by-bank'),
+        'public'                    => true,
+        'exclude_from_search'       => false,
+        'show_in_admin_all_list'    => true,
+        'show_in_admin_status_list' => true,
+        /* translators: %s: count */
+        'label_count'               => _n_noop('Payment Sent <span class="count">(%s)</span>', 'Payment Sent <span class="count">(%s)</span>', 'wall-id-pay-by-bank')
+    ));
+}
+add_action('init', 'wallid_register_payment_sent_order_status');
+
+// Add custom status to WooCommerce order statuses list
+function wallid_add_payment_sent_to_order_statuses($order_statuses) {
+    $new_order_statuses = array();
+    
+    // Insert 'payment-sent' right after 'pending'
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-pending' === $key) {
+            $new_order_statuses['wc-payment-sent'] = _x('Payment Sent', 'Order status', 'wall-id-pay-by-bank');
+        }
+    }
+    
+    return $new_order_statuses;
+}
+add_filter('wc_order_statuses', 'wallid_add_payment_sent_to_order_statuses');
+
+// Allow payment_complete() to transition from payment-sent to processing/completed
+function wallid_valid_statuses_for_payment_complete($statuses, $order) {
+    $statuses[] = 'payment-sent';
+    return $statuses;
+}
+add_filter('woocommerce_valid_order_statuses_for_payment_complete', 'wallid_valid_statuses_for_payment_complete', 10, 2);
+
 add_action('plugins_loaded', 'woocommerce_gateway_wallid_init');
