@@ -37,7 +37,7 @@ class PaymentProcess
 
         // Create payment via API
         // Using API base URL as payRedirectUrl (can be configured if needed)
-        $payRedirectUrl = 'https://pay.wallid.co'; // Base URL for payment redirect
+        $payRedirectUrl = 'https://pay.stg.wlld.dev'; // Base URL for payment redirect
         
         $paymentResult = $apiClient->createPayment(
             $order->get_total(),
@@ -58,8 +58,8 @@ class PaymentProcess
         $url = $paymentResult['url'];
         $paymentId = $paymentResult['paymentId'];
 
-        // Keep order in a core unpaid status so payment_complete() can transition it.
-        $order->update_status('pending', 'Awaiting payment');
+        // Add order note instead of updating status to pending (since it's already pending)
+        $order->add_order_note(__('Awaiting payment via Wallid', 'wall-id-pay-by-bank'));
 
         $order->add_meta_data( '_wallid_payment_id', $paymentId );
         $order->add_meta_data( '_wallid_payment_url', $url );
