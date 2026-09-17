@@ -180,9 +180,12 @@ class PaymentNotification
         $order->add_order_note("WALLID: Order found, processing the webhook with status " . $status, 0);
 
         if ($status == 'sent') {
-            wallid_log('Wallid webhook: Status is still sent, no action taken', 'debug');
+            wallid_log('Wallid webhook: Status is sent, updating order to payment-sent', 'debug');
+            
+            $order->update_status('payment-sent', __('Payment Sent (Status: sent)', 'wall-id-pay-by-bank'));
+            
             self::sendJsonResponse(200, [
-                'message' => 'Status unchanged',
+                'message' => 'Status updated to payment-sent',
                 'status'  => 'sent',
             ]);
         }
