@@ -37,7 +37,7 @@ class PaymentProcess
 
         // Create payment via API
         // Using API base URL as payRedirectUrl (can be configured if needed)
-        $payRedirectUrl = 'https://pay.stg.wlld.dev'; // Base URL for payment redirect
+        $payRedirectUrl = 'https://pay.wallid.co'; // Base URL for payment redirect
         
         $paymentResult = $apiClient->createPayment(
             $order->get_total(),
